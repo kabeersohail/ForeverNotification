@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.media.AudioAttributes
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -55,50 +54,45 @@ class MyForegroundService : Service() {
     override fun onBind(p0: Intent?): IBinder? = null
 
     private fun notification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                notificationChannelID,
-                "notification",
-                NotificationManager.IMPORTANCE_HIGH
+        val channel = NotificationChannel(
+            notificationChannelID,
+            "notification",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+
+        // Set sound to null to make the notification silent
+        val audioAttributes = AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .build()
+        channel.setSound(Uri.EMPTY, audioAttributes)
+
+        Toast.makeText(applicationContext, "Service Started", Toast.LENGTH_SHORT).show()
+
+        notificationManager.createNotificationChannel(channel)
+
+        notificationBuilder =
+            NotificationCompat.Builder(this, notificationChannelID)
+                .setContentTitle("Weather")
+                .setContentText("Count: 0")
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_IMMUTABLE
             )
+        notificationBuilder?.setContentIntent(pendingIntent)
 
-            // Set sound to null to make the notification silent
-            val audioAttributes = AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                .build()
-            channel.setSound(Uri.EMPTY, audioAttributes)
+        // Start the periodic notification update
+        updateNotificationHandler.post(updateNotificationRunnable)
 
-            Toast.makeText(applicationContext, "Service Started", Toast.LENGTH_SHORT).show()
-
-            notificationManager.createNotificationChannel(channel)
-
-            notificationBuilder =
-                NotificationCompat.Builder(this, notificationChannelID)
-                    .setContentTitle("Weather")
-                    .setContentText("Count: 0")
-                    .setSmallIcon(R.drawable.ic_launcher_background)
-                    .setPriority(NotificationCompat.PRIORITY_MAX)
-
-            val notificationIntent = Intent(this, MainActivity::class.java)
-            val pendingIntent =
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    notificationIntent,
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-            notificationBuilder?.setContentIntent(pendingIntent)
-
-            // Start the periodic notification update
-            updateNotificationHandler.post(updateNotificationRunnable)
-
-            val notification = notificationBuilder?.build()
-            startForeground(1, notification)
-        } else {
-            Toast.makeText(applicationContext, "Notification not available", Toast.LENGTH_SHORT)
-                .show()
-        }
+        val notification = notificationBuilder?.build()
+        startForeground(1, notification)
     }
 
     private fun updateNotificationText(text: String) {
