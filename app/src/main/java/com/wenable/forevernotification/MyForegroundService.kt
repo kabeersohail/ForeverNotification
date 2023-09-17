@@ -2,7 +2,6 @@ package com.wenable.forevernotification
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -78,15 +77,6 @@ class MyForegroundService : Service() {
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
 
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent =
-            PendingIntent.getActivity(
-                this,
-                0,
-                notificationIntent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
-        notificationBuilder?.setContentIntent(pendingIntent)
 
         // Start the periodic notification update
         updateNotificationHandler.post(updateNotificationRunnable)
