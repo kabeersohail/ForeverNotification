@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
@@ -40,9 +41,16 @@ class MyForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        notification()
-        return super.onStartCommand(intent, flags, startId)
+        if (intent?.action == ACTION_BOOT_COMPLETED) {
+            // Service is started from BOOT_COMPLETED broadcast
+            notification()
+        } else {
+            // Service is started from the app
+            notification()
+        }
+        return START_STICKY
     }
+
 
     override fun onBind(p0: Intent?): IBinder? = null
 
