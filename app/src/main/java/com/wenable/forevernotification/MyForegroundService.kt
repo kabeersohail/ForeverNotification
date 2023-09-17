@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 
@@ -24,7 +25,7 @@ class MyForegroundService : Service() {
     private val notificationChannelID = "Permanent Notification"
     private var counter = 0
 
-    private val updateNotificationHandler = Handler()
+    private val updateNotificationHandler = Handler(Looper.getMainLooper())
     private val updateNotificationRunnable = object : Runnable {
         override fun run() {
             // Update the notification text here
