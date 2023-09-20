@@ -39,6 +39,7 @@ class MyForegroundService : Service() {
     lateinit var networkMonitor: NetworkMonitor
 
     private var notificationBuilder: NotificationCompat.Builder? = null
+
     private val notificationChannelID = "Permanent Notification"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -51,52 +52,75 @@ class MyForegroundService : Service() {
         }
 
         // Start monitoring network state using the flow
+        monitorNetwork()
+
+        return START_STICKY
+    }
+
+    private fun monitorNetwork() {
         CoroutineScope(Dispatchers.Main).launch {
             networkMonitor.isConnected.collect { isConnected ->
                 updateNotificationText("Network: ${if (isConnected) "Available" else "Unavailable"}")
 
-                if(isConnected) {
-                    val call = ApiProvider.apiService.getConfigData()
-
-                    call.enqueue(object : Callback<List<ConfigData>> {
-
-                        override fun onFailure(call: Call<List<ConfigData>>, t: Throwable) {
-                            Log.e(TAG, "Exception occurred while fetching ConfigData: ${t.message}")
-                        }
-
-                        override fun onResponse(
-                            call: Call<List<ConfigData>>,
-                            response: Response<List<ConfigData>>
-                        ) {
-                            if (response.isSuccessful) {
-                                val configDataList: List<ConfigData> = response.body() ?: return
-
-                                configDataList.forEach { configData ->
-                                    CoroutineScope(Dispatchers.IO).launch {
-
-                                        when(val downloadResult = DownloadManager().downloadFile(this@MyForegroundService, configData)) {
-                                            is DownloadResult.Failed -> {
-                                                // retry mechanism with exponential backoff criteria
-                                                Log.e(TAG, downloadResult.exception.message ?: "Download failed for $downloadResult.")
-                                            }
-                                            is DownloadResult.Success -> {
-                                                // Handle success case, like storing in room database
-                                                downloadResult.configData
-                                            }
-                                        }
-
-                                    }
-                                }
-                            } else {
-                                Log.e(TAG, "Error occurred while fetching ConfigData: Error Code: ${response.code()} Error Message: ${response.message()}")
-                            }
-                        }
-                    })
+                if (isConnected) {
+                    fetchRemoteServerData()
                 }
             }
         }
+    }
 
-        return START_STICKY
+    private fun fetchRemoteServerData() {
+        val call = ApiProvider.apiService.getConfigData()
+        call.enqueue(object : Callback<List<ConfigData>> {
+
+            override fun onFailure(call: Call<List<ConfigData>>, t: Throwable) {
+                Log.e(TAG, "Exception occurred while fetching ConfigData: ${t.message}")
+            }
+
+            override fun onResponse(
+                call: Call<List<ConfigData>>,
+                response: Response<List<ConfigData>>
+            ) {
+                if (response.isSuccessful) {
+                    handleSuccess(response)
+                } else {
+                    handleFailure(response)
+                }
+            }
+        })
+    }
+
+    private fun handleFailure(response: Response<List<ConfigData>>) {
+        Log.e(TAG, "Error occurred while fetching ConfigData: Error Code: ${response.code()} Error Message: ${response.message()}")
+    }
+
+    private fun handleSuccess(response: Response<List<ConfigData>>) {
+        val configDataList: List<ConfigData> = response.body() ?: return
+
+        configDataList.forEach { configData ->
+            CoroutineScope(Dispatchers.IO).launch {
+
+                when (val downloadResult = DownloadManager().downloadFile(
+                    this@MyForegroundService,
+                    configData
+                )) {
+                    is DownloadResult.Failed -> {
+                        // retry mechanism with exponential backoff criteria
+                        Log.e(
+                            TAG,
+                            downloadResult.exception.message
+                                ?: "Download failed for $downloadResult."
+                        )
+                    }
+
+                    is DownloadResult.Success -> {
+                        // Handle success case, like storing in room database
+                        downloadResult.configData
+                    }
+                }
+
+            }
+        }
     }
 
     private fun notification() {
