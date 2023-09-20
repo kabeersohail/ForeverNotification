@@ -16,7 +16,9 @@ class NetworkMonitor @Inject constructor(
     @ApplicationContext context: Context
 ) {
 
-    val isConnected: Flow<Boolean> = callbackFlow {
+    val isConnected = (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).isConnected()
+
+    val isConnectedFlow: Flow<Boolean> = callbackFlow {
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)

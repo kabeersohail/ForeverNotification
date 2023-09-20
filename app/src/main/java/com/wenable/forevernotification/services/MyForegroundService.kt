@@ -52,6 +52,10 @@ class MyForegroundService : Service() {
             notification()
         }
 
+        if(networkMonitor.isConnected) {
+            fetchConfigData()
+        }
+
         // Start monitoring network state using the flow
         monitorNetwork()
 
@@ -60,17 +64,17 @@ class MyForegroundService : Service() {
 
     private fun monitorNetwork() {
         CoroutineScope(Dispatchers.Main).launch {
-            networkMonitor.isConnected.collect { isConnected ->
+            networkMonitor.isConnectedFlow.collect { isConnected ->
                 updateNotificationText("Network: ${if (isConnected) "Available" else "Unavailable"}")
 
                 if (isConnected) {
-                    fetchRemoteServerData()
+                    fetchConfigData()
                 }
             }
         }
     }
 
-    private fun fetchRemoteServerData() {
+    private fun fetchConfigData() {
         val call = ApiProvider.apiService.getConfigData()
         call.enqueue(object : Callback<List<ConfigData>> {
 
