@@ -151,7 +151,7 @@ class MyForegroundService : Service() {
 
         notificationBuilder =
             NotificationCompat.Builder(this, notificationChannelID)
-                .setContentTitle("Weather")
+                .setContentTitle("SmartAgent")
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
 
