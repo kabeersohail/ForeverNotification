@@ -39,7 +39,7 @@ class NetworkMonitor @Inject constructor(
 
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        trySend(ConnectedCompat.isConnected(connectivityManager))
+        trySend(connectivityManager.isConnected())
         connectivityManager.registerNetworkCallback(request, callback)
 
         awaitClose {
