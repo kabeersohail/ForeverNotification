@@ -9,24 +9,15 @@ import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.media.AudioAttributes
 import android.net.Uri
 import android.os.IBinder
-import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import com.wenable.downloadmanager.DownloadManager
-import com.wenable.downloadmanager.DownloadResult
-import com.wenable.downloadmanager.models.ConfigData
 import com.wenable.forevernotification.R
-import com.wenable.forevernotification.extensions.TAG
-import com.wenable.forevernotification.extensions.isConfigDataAlreadyAvailable
-import com.wenable.forevernotification.network.ApiProvider
+import com.wenable.forevernotification.repository.DataConfigRepository
 import com.wenable.forevernotification.utils.NetworkMonitor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -38,6 +29,9 @@ class MyForegroundService : Service() {
 
     @Inject
     lateinit var networkMonitor: NetworkMonitor
+
+    @Inject
+    lateinit var dataConfigRepository: DataConfigRepository
 
     private var notificationBuilder: NotificationCompat.Builder? = null
 
@@ -53,7 +47,7 @@ class MyForegroundService : Service() {
         }
 
         if(networkMonitor.isConnected) {
-            fetchConfigData()
+            dataConfigRepository.fetchConfigData()
         }
 
         // Start monitoring network state using the flow
@@ -68,70 +62,8 @@ class MyForegroundService : Service() {
                 updateNotificationText("Network: ${if (isConnected) "Available" else "Unavailable"}")
 
                 if (isConnected) {
-                    fetchConfigData()
+                    dataConfigRepository.fetchConfigData()
                 }
-            }
-        }
-    }
-
-    private fun fetchConfigData() {
-        val call = ApiProvider.apiService.getConfigData()
-        call.enqueue(object : Callback<List<ConfigData>> {
-
-            override fun onFailure(call: Call<List<ConfigData>>, t: Throwable) {
-                Log.e(TAG, "Exception occurred while fetching ConfigData: ${t.message}")
-            }
-
-            override fun onResponse(
-                call: Call<List<ConfigData>>,
-                response: Response<List<ConfigData>>
-            ) {
-                if (response.isSuccessful) {
-                    handleAPISuccess(response)
-                } else {
-                    handleAPIFailure(response)
-                }
-            }
-        })
-    }
-
-    private fun handleAPIFailure(response: Response<List<ConfigData>>) {
-        Log.e(TAG, "Error occurred while fetching ConfigData: Error Code: ${response.code()} Error Message: ${response.message()}")
-    }
-
-    private fun handleAPISuccess(response: Response<List<ConfigData>>) {
-        val configDataList: List<ConfigData> = response.body() ?: run {
-            Log.d(TAG, "Response body is null")
-            return
-        }
-
-        configDataList.forEach { configData ->
-            handleConfigData(configData)
-        }
-    }
-
-    private fun handleConfigData(configData: ConfigData) {
-
-        if (configData.isConfigDataAlreadyAvailable(filesDir)) {
-            Log.i(TAG, "${configData.name} already downloaded")
-            return
-        }
-
-        CoroutineScope(Dispatchers.IO).launch {
-            downloadConfigData(configData)
-        }
-    }
-
-    private suspend fun downloadConfigData(configData: ConfigData) {
-        when (val downloadResult = DownloadManager().downloadFile(this@MyForegroundService, configData)) {
-            is DownloadResult.Failed -> {
-                // retry mechanism with exponential backoff criteria
-                Log.e(TAG, downloadResult.exception.message ?: "Download failed for $downloadResult.")
-            }
-
-            is DownloadResult.Success -> {
-                // Handle success case, like storing in room database
-                downloadResult.configData
             }
         }
     }
