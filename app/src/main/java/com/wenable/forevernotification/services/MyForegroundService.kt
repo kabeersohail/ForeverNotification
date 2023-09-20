@@ -17,6 +17,7 @@ import com.wenable.downloadmanager.DownloadResult
 import com.wenable.downloadmanager.models.ConfigData
 import com.wenable.forevernotification.R
 import com.wenable.forevernotification.extensions.TAG
+import com.wenable.forevernotification.extensions.isConfigDataAlreadyAvailable
 import com.wenable.forevernotification.network.ApiProvider
 import com.wenable.forevernotification.utils.NetworkMonitor
 import dagger.hilt.android.AndroidEntryPoint
@@ -82,43 +83,51 @@ class MyForegroundService : Service() {
                 response: Response<List<ConfigData>>
             ) {
                 if (response.isSuccessful) {
-                    handleSuccess(response)
+                    handleAPISuccess(response)
                 } else {
-                    handleFailure(response)
+                    handleAPIFailure(response)
                 }
             }
         })
     }
 
-    private fun handleFailure(response: Response<List<ConfigData>>) {
+    private fun handleAPIFailure(response: Response<List<ConfigData>>) {
         Log.e(TAG, "Error occurred while fetching ConfigData: Error Code: ${response.code()} Error Message: ${response.message()}")
     }
 
-    private fun handleSuccess(response: Response<List<ConfigData>>) {
-        val configDataList: List<ConfigData> = response.body() ?: return
+    private fun handleAPISuccess(response: Response<List<ConfigData>>) {
+        val configDataList: List<ConfigData> = response.body() ?: run {
+            Log.d(TAG, "Response body is null")
+            return
+        }
 
         configDataList.forEach { configData ->
-            CoroutineScope(Dispatchers.IO).launch {
+            handleConfigData(configData)
+        }
+    }
 
-                when (val downloadResult = DownloadManager().downloadFile(
-                    this@MyForegroundService,
-                    configData
-                )) {
-                    is DownloadResult.Failed -> {
-                        // retry mechanism with exponential backoff criteria
-                        Log.e(
-                            TAG,
-                            downloadResult.exception.message
-                                ?: "Download failed for $downloadResult."
-                        )
-                    }
+    private fun handleConfigData(configData: ConfigData) {
 
-                    is DownloadResult.Success -> {
-                        // Handle success case, like storing in room database
-                        downloadResult.configData
-                    }
-                }
+        if (configData.isConfigDataAlreadyAvailable(filesDir)) {
+            Log.i(TAG, "${configData.name} already downloaded")
+            return
+        }
 
+        CoroutineScope(Dispatchers.IO).launch {
+            downloadConfigData(configData)
+        }
+    }
+
+    private suspend fun downloadConfigData(configData: ConfigData) {
+        when (val downloadResult = DownloadManager().downloadFile(this@MyForegroundService, configData)) {
+            is DownloadResult.Failed -> {
+                // retry mechanism with exponential backoff criteria
+                Log.e(TAG, downloadResult.exception.message ?: "Download failed for $downloadResult.")
+            }
+
+            is DownloadResult.Success -> {
+                // Handle success case, like storing in room database
+                downloadResult.configData
             }
         }
     }
@@ -130,7 +139,6 @@ class MyForegroundService : Service() {
             NotificationManager.IMPORTANCE_HIGH
         )
 
-        // Set sound to null to make the notification silent
         val audioAttributes = AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
             .setUsage(AudioAttributes.USAGE_NOTIFICATION)
