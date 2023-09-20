@@ -6,5 +6,5 @@ import retrofit2.http.GET
 
 interface ApiService {
     @GET("fetch_config")
-    fun getConfigData(): Call<ConfigData>
+    fun getConfigData(): Call<List<ConfigData>>
 }

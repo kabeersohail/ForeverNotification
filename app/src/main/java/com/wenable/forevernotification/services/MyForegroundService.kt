@@ -1,5 +1,6 @@
 package com.wenable.forevernotification.services
 
+import DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -9,15 +10,24 @@ import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.media.AudioAttributes
 import android.net.Uri
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import com.wenable.downloadmanager.DownloadManager
 import com.wenable.forevernotification.utils.NetworkMonitor
 import com.wenable.forevernotification.R
+import com.wenable.forevernotification.extensions.TAG
+import com.wenable.forevernotification.models.ConfigData
+import com.wenable.forevernotification.network.ApiProvider
+import com.wenable.forevernotification.utils.Constants.HTML
+import com.wenable.forevernotification.utils.Constants.IMAGE
+import com.wenable.forevernotification.utils.Constants.VIDEO
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -48,17 +58,57 @@ class MyForegroundService : Service() {
                 updateNotificationText("Network: ${if (isConnected) "Available" else "Unavailable"}")
 
                 if(isConnected) {
-                    DownloadManager().downloadImageAndSaveToGallery(
-                        this@MyForegroundService,
-                        "https://images.pexels.com/photos/842711/pexels-photo-842711.jpeg",
-                    "MyAlbus"
-                    )
+                    val call = ApiProvider.apiService.getConfigData()
+
+                    call.enqueue(object : Callback<List<ConfigData>> {
+
+                        override fun onFailure(call: Call<List<ConfigData>>, t: Throwable) {
+                            Log.e(TAG, "Exception occurred while fetching ConfigData: ${t.message}")
+                        }
+
+                        override fun onResponse(
+                            call: Call<List<ConfigData>>,
+                            response: Response<List<ConfigData>>
+                        ) {
+                            if (response.isSuccessful) {
+                                val configDataList: List<ConfigData> = response.body() ?: return
+
+                                configDataList.forEach { configData ->
+                                    when(configData.type) {
+                                        IMAGE -> {
+                                            CoroutineScope(Dispatchers.IO).launch {
+                                                DownloadManager().downloadAndSaveImageToGallery(
+                                                    this@MyForegroundService,
+                                                    configData.cdn_path,
+                                                    "YantraNet"
+                                                )
+                                            }
+                                        }
+                                        VIDEO -> {}
+                                        HTML -> {}
+                                    }
+                                }
+
+                                // Use the configData object as needed
+                            } else {
+                                Log.e(TAG, "Error occurred while fetching ConfigData: Error Code: ${response.code()} Error Message: ${response.message()}")
+                            }
+                        }
+                    })
                 }
 
             }
         }
 
         return START_STICKY
+    }
+
+    private suspend fun exampleImageDownload() {
+        DownloadManager().downloadAndSaveImageToGallery(
+            this@MyForegroundService,
+            "https://images.pexels.com/photos/842711/pexels-photo-842711.jpeg",
+            "MyAlbus"
+        )
     }
 
     private fun notification() {
