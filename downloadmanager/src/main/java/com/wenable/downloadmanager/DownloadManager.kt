@@ -2,6 +2,7 @@ package com.wenable.downloadmanager
 
 import android.content.Context
 import com.wenable.downloadmanager.models.ConfigData
+import com.wenable.downloadmanager.results.DownloadResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -30,7 +31,3 @@ class DownloadManager {
     }
 }
 
-sealed class DownloadResult {
-    data class Success(val configData: ConfigData, val downloadLocation: String): DownloadResult()
-    data class Failed(val configData: ConfigData, val exception: Exception): DownloadResult()
-}

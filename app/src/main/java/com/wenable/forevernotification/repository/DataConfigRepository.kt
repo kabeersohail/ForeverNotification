@@ -3,8 +3,8 @@ package com.wenable.forevernotification.repository
 import android.content.Context
 import android.util.Log
 import com.wenable.downloadmanager.DownloadManager
-import com.wenable.downloadmanager.DownloadResult
 import com.wenable.downloadmanager.models.ConfigData
+import com.wenable.downloadmanager.results.DownloadResult
 import com.wenable.forevernotification.extensions.TAG
 import com.wenable.forevernotification.extensions.isConfigDataAlreadyAvailable
 import com.wenable.forevernotification.network.ApiProvider
@@ -82,5 +82,4 @@ class DataConfigRepository @Inject constructor(
             }
         }
     }
-
 }
