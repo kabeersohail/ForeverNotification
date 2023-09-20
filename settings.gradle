@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ForeverNotification"
 include ':app'
+include ':downloadmanager'

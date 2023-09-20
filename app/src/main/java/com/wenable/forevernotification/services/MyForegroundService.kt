@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.IBinder
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import com.wenable.downloadmanager.DownloadManager
 import com.wenable.forevernotification.utils.NetworkMonitor
 import com.wenable.forevernotification.R
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,6 +46,15 @@ class MyForegroundService : Service() {
         CoroutineScope(Dispatchers.Main).launch {
             networkMonitor.isConnected.collect { isConnected ->
                 updateNotificationText("Network: ${if (isConnected) "Available" else "Unavailable"}")
+
+                if(isConnected) {
+                    DownloadManager().downloadImageAndSaveToGallery(
+                        this@MyForegroundService,
+                        "https://images.pexels.com/photos/842711/pexels-photo-842711.jpeg",
+                    "MyAlbus"
+                    )
+                }
+
             }
         }
 
