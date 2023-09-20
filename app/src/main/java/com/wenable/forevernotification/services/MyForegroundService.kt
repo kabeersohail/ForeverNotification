@@ -1,6 +1,5 @@
 package com.wenable.forevernotification.services
 
-import DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -13,14 +12,12 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import com.wenable.forevernotification.utils.NetworkMonitor
+import com.wenable.downloadmanager.DownloadManager
+import com.wenable.downloadmanager.models.ConfigData
 import com.wenable.forevernotification.R
 import com.wenable.forevernotification.extensions.TAG
-import com.wenable.forevernotification.models.ConfigData
 import com.wenable.forevernotification.network.ApiProvider
-import com.wenable.forevernotification.utils.Constants.HTML
-import com.wenable.forevernotification.utils.Constants.IMAGE
-import com.wenable.forevernotification.utils.Constants.VIDEO
+import com.wenable.forevernotification.utils.NetworkMonitor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,23 +70,14 @@ class MyForegroundService : Service() {
                             if (response.isSuccessful) {
                                 val configDataList: List<ConfigData> = response.body() ?: return
 
-                                configDataList.forEach { configData ->
-                                    when(configData.type) {
-                                        IMAGE -> {
-                                            CoroutineScope(Dispatchers.IO).launch {
-                                                DownloadManager().downloadAndSaveImageToGallery(
-                                                    this@MyForegroundService,
-                                                    configData.cdn_path,
-                                                    "YantraNet"
-                                                )
-                                            }
-                                        }
-                                        VIDEO -> {}
-                                        HTML -> {}
-                                    }
+                                // Download each file to the local filesystem.
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    DownloadManager().downloadFile(
+                                        this@MyForegroundService,
+                                        configDataList.last { it.type == "VIDEO" }
+                                    )
                                 }
 
-                                // Use the configData object as needed
                             } else {
                                 Log.e(TAG, "Error occurred while fetching ConfigData: Error Code: ${response.code()} Error Message: ${response.message()}")
                             }
@@ -101,14 +89,6 @@ class MyForegroundService : Service() {
         }
 
         return START_STICKY
-    }
-
-    private suspend fun exampleImageDownload() {
-        DownloadManager().downloadAndSaveImageToGallery(
-            this@MyForegroundService,
-            "https://images.pexels.com/photos/842711/pexels-photo-842711.jpeg",
-            "MyAlbus"
-        )
     }
 
     private fun notification() {

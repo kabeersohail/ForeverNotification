@@ -1,4 +1,4 @@
-package com.wenable.forevernotification.models
+package com.wenable.downloadmanager.models
 
 data class ConfigData(
     val id: String,

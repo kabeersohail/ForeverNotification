@@ -1,4 +1,4 @@
-package com.wenable.forevernotification.utils
+package com.wenable.downloadmanager.utils
 
 object Constants {
     const val IMAGE = "IMAGE"
