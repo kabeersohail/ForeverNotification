@@ -13,6 +13,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.wenable.downloadmanager.DownloadManager
+import com.wenable.downloadmanager.DownloadResult
 import com.wenable.downloadmanager.models.ConfigData
 import com.wenable.forevernotification.R
 import com.wenable.forevernotification.extensions.TAG
@@ -70,21 +71,28 @@ class MyForegroundService : Service() {
                             if (response.isSuccessful) {
                                 val configDataList: List<ConfigData> = response.body() ?: return
 
-                                // Download each file to the local filesystem.
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    DownloadManager().downloadFile(
-                                        this@MyForegroundService,
-                                        configDataList.last { it.type == "VIDEO" }
-                                    )
-                                }
+                                configDataList.forEach { configData ->
+                                    CoroutineScope(Dispatchers.IO).launch {
 
+                                        when(val downloadResult = DownloadManager().downloadFile(this@MyForegroundService, configData)) {
+                                            is DownloadResult.Failed -> {
+                                                // retry mechanism with exponential backoff criteria
+                                                Log.e(TAG, downloadResult.exception.message ?: "Download failed for $downloadResult.")
+                                            }
+                                            is DownloadResult.Success -> {
+                                                // Handle success case, like storing in room database
+                                                downloadResult.configData
+                                            }
+                                        }
+
+                                    }
+                                }
                             } else {
                                 Log.e(TAG, "Error occurred while fetching ConfigData: Error Code: ${response.code()} Error Message: ${response.message()}")
                             }
                         }
                     })
                 }
-
             }
         }
 

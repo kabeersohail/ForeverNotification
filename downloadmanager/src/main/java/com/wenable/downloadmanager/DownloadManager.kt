@@ -10,16 +10,27 @@ import java.net.URL
 
 class DownloadManager {
     // Create a function to download a file from a given URL.
-    suspend fun downloadFile(context: Context, configData: ConfigData) = withContext(Dispatchers.IO) {
-        val internalStorageDirectory = context.filesDir
-        val destinationPath = File(internalStorageDirectory, configData.name)
-        val inputStream = URL("https://www.pexels.com/download/video/3209828/").openStream()
-        val outputStream = FileOutputStream(destinationPath)
+    suspend fun downloadFile(context: Context, configData: ConfigData): DownloadResult = withContext(Dispatchers.IO) {
+        try {
+            val internalStorageDirectory = context.filesDir
+            val destinationPath = File(internalStorageDirectory, configData.name)
+            val inputStream = URL(configData.cdn_path).openStream()
+            val outputStream = FileOutputStream(destinationPath)
 
-        inputStream.use { input ->
-            outputStream.use { output ->
-                input.copyTo(output)
+            inputStream.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
             }
+
+            DownloadResult.Success(configData, destinationPath.absolutePath)
+        } catch (e: Exception) {
+            DownloadResult.Failed(configData, e)
         }
     }
+}
+
+sealed class DownloadResult {
+    data class Success(val configData: ConfigData, val downloadLocation: String): DownloadResult()
+    data class Failed(val configData: ConfigData, val exception: Exception): DownloadResult()
 }
