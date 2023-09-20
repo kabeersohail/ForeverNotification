@@ -19,6 +19,7 @@
         android:theme="@style/Theme.ForeverNotification"
         tools:targetApi="31">
         <activity
+            android:theme="@style/Theme.Transparent"
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

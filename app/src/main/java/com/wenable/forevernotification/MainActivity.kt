@@ -1,16 +1,5 @@
 package com.wenable.forevernotification
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.app.Activity
 
-class MainActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        // Start the MyForegroundService
-        startService(Intent(this, MyForegroundService::class.java))
-    }
-}
+class MainActivity : Activity()
