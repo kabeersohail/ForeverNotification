@@ -1,4 +1,4 @@
-package com.wenable.forevernotification
+package com.wenable.forevernotification.views
 
 import android.app.Activity
 
