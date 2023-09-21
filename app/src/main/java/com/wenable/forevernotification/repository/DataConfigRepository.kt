@@ -2,12 +2,13 @@ package com.wenable.forevernotification.repository
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.wenable.downloadmanager.DownloadManager
 import com.wenable.downloadmanager.models.ConfigData
 import com.wenable.downloadmanager.results.DownloadResult
 import com.wenable.forevernotification.extensions.TAG
 import com.wenable.forevernotification.extensions.isConfigDataAlreadyAvailable
-import com.wenable.forevernotification.network.ApiProvider
+import com.wenable.forevernotification.network.ApiService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,11 +19,12 @@ import retrofit2.Response
 import javax.inject.Inject
 
 class DataConfigRepository @Inject constructor(
-    @ApplicationContext val context: Context
+    @ApplicationContext val context: Context,
+    private val apiService: ApiService
 ) {
 
     fun fetchConfigData() {
-        val call = ApiProvider.apiService.getConfigData()
+        val call = apiService.getConfigData()
         call.enqueue(object : Callback<List<ConfigData>> {
 
             override fun onFailure(call: Call<List<ConfigData>>, t: Throwable) {
@@ -34,7 +36,13 @@ class DataConfigRepository @Inject constructor(
                 response: Response<List<ConfigData>>
             ) {
                 if (response.isSuccessful) {
-                    handleAPISuccess(response)
+
+                    val configDataList: List<ConfigData> = response.body() ?: run {
+                        Log.d(TAG, "Response body is null")
+                        return
+                    }
+
+                    handleAPISuccess(configDataList)
                 } else {
                     handleAPIFailure(response)
                 }
@@ -42,15 +50,12 @@ class DataConfigRepository @Inject constructor(
         })
     }
 
-    private fun handleAPIFailure(response: Response<List<ConfigData>>) {
+    fun handleAPIFailure(response: Response<List<ConfigData>>) {
         Log.e(TAG, "Error occurred while fetching ConfigData: Error Code: ${response.code()} Error Message: ${response.message()}")
     }
 
-    private fun handleAPISuccess(response: Response<List<ConfigData>>) {
-        val configDataList: List<ConfigData> = response.body() ?: run {
-            Log.d(TAG, "Response body is null")
-            return
-        }
+    @VisibleForTesting
+    internal fun handleAPISuccess(configDataList: List<ConfigData>) {
 
         configDataList.forEach { configData ->
             handleConfigData(configData)
