@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.wenable.forevernotification'
+    namespace 'com.wenable.smartagent'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.wenable.forevernotification"
+        applicationId "com.wenable.smartagent"
         minSdk 28
         targetSdk 34
         versionCode 1

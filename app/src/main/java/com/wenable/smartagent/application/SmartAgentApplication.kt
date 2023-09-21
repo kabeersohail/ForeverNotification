@@ -6,7 +6,7 @@ import com.wenable.smartagent.services.MyForegroundService
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class ForeverNotificationApplication: Application() {
+class SmartAgentApplication: Application() {
     override fun onCreate() {
         super.onCreate()
         // Start the MyForegroundService
