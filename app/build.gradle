@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.wenable.smartagent'
+    namespace 'com.yantranet.smartagent'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.wenable.smartagent"
+        applicationId "com.yantranet.smartagent"
         minSdk 28
         targetSdk 34
         versionCode 1
