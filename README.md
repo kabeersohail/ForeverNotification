@@ -50,7 +50,7 @@ To build and run the SmartAgent app:
 1. Clone this repository.
 
 ```bash
-git clone https://github.com/your-username/smartagent-android.git
+git clone https://github.com/kabeersohail/ForeverNotification.git
 ```
 
 2. Open the project in Android Studio.
