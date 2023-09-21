@@ -6,6 +6,8 @@ import androidx.annotation.VisibleForTesting
 import com.yantranet.downloadmanager.DownloadManager
 import com.yantranet.downloadmanager.models.ConfigData
 import com.yantranet.downloadmanager.results.DownloadResult
+import com.yantranet.smartagent.database.SmartAgentDatabase
+import com.yantranet.smartagent.database.entities.ConfigDataEntity
 import com.yantranet.smartagent.extensions.TAG
 import com.yantranet.smartagent.extensions.isConfigDataAlreadyAvailable
 import com.yantranet.smartagent.network.ApiService
@@ -41,6 +43,14 @@ class DataConfigRepository @Inject constructor(
                         Log.d(TAG, "Response body is null")
                         return
                     }
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        configDataList.forEach {
+                            val configDataEntity = ConfigDataEntity(it.id, it.name, it.type, it.sizeInBytes, it.cdn_path)
+                            SmartAgentDatabase.getInstance(context).configDataDao().insert(configDataEntity)
+                        }
+                    }
+
 
                     handleAPISuccess(configDataList)
                 } else {
