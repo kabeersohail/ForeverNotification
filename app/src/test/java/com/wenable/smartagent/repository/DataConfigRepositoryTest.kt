@@ -1,10 +1,10 @@
-package com.wenable.forevernotification.repository
+package com.wenable.smartagent.repository
 
 import android.content.Context
 import android.util.Log
 import com.wenable.downloadmanager.models.ConfigData
-import com.wenable.forevernotification.extensions.isConfigDataAlreadyAvailable
-import com.wenable.forevernotification.network.ApiService
+import com.wenable.smartagent.extensions.isConfigDataAlreadyAvailable
+import com.wenable.smartagent.network.ApiService
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import org.junit.After

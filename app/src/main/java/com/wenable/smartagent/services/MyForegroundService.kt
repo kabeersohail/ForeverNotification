@@ -1,4 +1,4 @@
-package com.wenable.forevernotification.services
+package com.wenable.smartagent.services
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -11,9 +11,9 @@ import android.net.Uri
 import android.os.IBinder
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import com.wenable.forevernotification.R
-import com.wenable.forevernotification.repository.DataConfigRepository
-import com.wenable.forevernotification.utils.NetworkMonitor
+import com.wenable.smartagent.R
+import com.wenable.smartagent.repository.DataConfigRepository
+import com.wenable.smartagent.utils.NetworkMonitor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

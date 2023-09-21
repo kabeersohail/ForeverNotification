@@ -1,4 +1,4 @@
-package com.wenable.forevernotification.network
+package com.wenable.smartagent.network
 
 import com.wenable.downloadmanager.models.ConfigData
 import retrofit2.Call

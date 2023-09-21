@@ -1,4 +1,4 @@
-package com.wenable.forevernotification
+package com.wenable.smartagent
 
 import org.junit.Test
 

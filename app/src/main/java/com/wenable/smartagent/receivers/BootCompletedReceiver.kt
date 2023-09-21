@@ -1,9 +1,9 @@
-package com.wenable.forevernotification.receivers
+package com.wenable.smartagent.receivers
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.wenable.forevernotification.services.MyForegroundService
+import com.wenable.smartagent.services.MyForegroundService
 
 class BootCompletedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {

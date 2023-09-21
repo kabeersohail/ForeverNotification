@@ -1,8 +1,8 @@
-package com.wenable.forevernotification.application
+package com.wenable.smartagent.application
 
 import android.app.Application
 import android.content.Intent
-import com.wenable.forevernotification.services.MyForegroundService
+import com.wenable.smartagent.services.MyForegroundService
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp

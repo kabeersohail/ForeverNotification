@@ -1,4 +1,4 @@
-package com.wenable.forevernotification.extensions
+package com.wenable.smartagent.extensions
 
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET

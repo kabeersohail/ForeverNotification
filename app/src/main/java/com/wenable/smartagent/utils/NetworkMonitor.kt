@@ -1,11 +1,11 @@
-package com.wenable.forevernotification.utils
+package com.wenable.smartagent.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import com.wenable.forevernotification.extensions.isConnected
+import com.wenable.smartagent.extensions.isConnected
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

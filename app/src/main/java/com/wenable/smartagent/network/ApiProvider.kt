@@ -1,4 +1,4 @@
-package com.wenable.forevernotification.network
+package com.wenable.smartagent.network
 
 import dagger.Module
 import dagger.Provides

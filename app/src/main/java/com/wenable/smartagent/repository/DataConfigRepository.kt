@@ -1,4 +1,4 @@
-package com.wenable.forevernotification.repository
+package com.wenable.smartagent.repository
 
 import android.content.Context
 import android.util.Log
@@ -6,9 +6,9 @@ import androidx.annotation.VisibleForTesting
 import com.wenable.downloadmanager.DownloadManager
 import com.wenable.downloadmanager.models.ConfigData
 import com.wenable.downloadmanager.results.DownloadResult
-import com.wenable.forevernotification.extensions.TAG
-import com.wenable.forevernotification.extensions.isConfigDataAlreadyAvailable
-import com.wenable.forevernotification.network.ApiService
+import com.wenable.smartagent.extensions.TAG
+import com.wenable.smartagent.extensions.isConfigDataAlreadyAvailable
+import com.wenable.smartagent.network.ApiService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

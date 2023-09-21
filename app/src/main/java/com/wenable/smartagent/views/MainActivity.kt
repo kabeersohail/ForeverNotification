@@ -1,4 +1,4 @@
-package com.wenable.forevernotification.views
+package com.wenable.smartagent.views
 
 import android.app.Activity
 
