@@ -25,6 +25,8 @@ class DataConfigRepository @Inject constructor(
     private val apiService: ApiService
 ) {
 
+    private val downloadManager = DownloadManager()
+
     fun fetchConfigData() {
         val call = apiService.getConfigData()
         call.enqueue(object : Callback<List<ConfigData>> {
@@ -85,7 +87,7 @@ class DataConfigRepository @Inject constructor(
     }
 
     private suspend fun downloadConfigData(configData: ConfigData) {
-        when (val downloadResult = DownloadManager().downloadFile(context, configData)) {
+        when (val downloadResult = downloadManager.downloadFile(context, configData)) {
             is DownloadResult.Failed -> {
                 // retry mechanism with exponential backoff criteria
                 Log.e(TAG, downloadResult.exception.message ?: "Download failed for $downloadResult.")
