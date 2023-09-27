@@ -92,7 +92,7 @@ class DataConfigRepository @Inject constructor(
             }
 
             is DownloadResult.Success -> {
-                // Handle success case, like storing in room database
+                // Handle success case, like storing in room database or displaying on UI
                 downloadResult.configData
             }
         }
